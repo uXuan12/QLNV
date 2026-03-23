@@ -1,0 +1,35 @@
+{
+    "groups": [
+        {
+            "name": "app.jwt",
+            "type": "com.ems.config.JwtProperties",
+            "sourceType": "com.ems.config.JwtProperties",
+            "description": "JWT authentication configuration properties"
+        }
+    ],
+    "properties": [
+        {
+            "name": "app.jwt.secret",
+            "type": "java.lang.String",
+            "description": "JWT secret key for signing tokens (minimum 256-bit for HMAC-SHA256)",
+            "defaultValue": "mySecretKeyForJWTTokenGenerationAndValidationPurposeOnly12345"
+        },
+        {
+            "name": "app.jwt.expiration",
+            "type": "java.lang.Long",
+            "description": "JWT token expiration time in milliseconds (default: 86400000 = 24 hours)",
+            "defaultValue": "86400000"
+        }
+    ],
+    "hints": [
+        {
+            "name": "app.jwt.secret",
+            "values": [
+                {
+                    "value": "mySecretKeyForJWTTokenGenerationAndValidationPurposeOnly12345",
+                    "description": "Default secret key (change in production)"
+                }
+            ]
+        }
+    ]
+}

@@ -2,6 +2,7 @@ package com.ems.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
@@ -31,5 +32,6 @@ public class Certificate {
 
     @OneToMany(mappedBy = "certificate")
     @JsonManagedReference
+    @JsonIgnore
     private List<EmployeeCertificate> employeeCertificates;
 }

@@ -2,6 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface EmployeeLanguage {
+  id: number;
+  languageId: number;
+  languageName: string;
+}
+
+export interface EmployeeCertificate {
+  id: number;
+  certificateId: number;
+  certificateName: string;
+}
+
 export interface Employee {
   id: number;
   name: string;
@@ -9,6 +21,8 @@ export interface Employee {
   address: string;
   dob: string;
   userId?: number;
+  languages?: EmployeeLanguage[];
+  certificates?: EmployeeCertificate[];
 }
 
 @Injectable({

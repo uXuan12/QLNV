@@ -96,8 +96,12 @@ public class EmployeeController {
     public ResponseEntity<EmployeeDTO> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
         log.info("POST /api/employees - Creating new employee: {}", employeeDTO.getName());
         Employee employee = toEntity(employeeDTO);
-        Employee savedEmployee = employeeService.createEmployee(employee);
-        return ResponseEntity.ok(toDTO(savedEmployee));
+        // Service xử lý lưu Employee + nested relationships (languages/certificates)
+        Employee savedEmployee = employeeService.createEmployee(employee, employeeDTO);
+        
+        // Refresh employee để lấy updated languages và certificates từ junction tables
+        Employee refreshedEmployee = employeeRepository.findById(savedEmployee.getId()).orElse(savedEmployee);
+        return ResponseEntity.ok(toDTO(refreshedEmployee));
     }
 
     /**
@@ -117,11 +121,16 @@ public class EmployeeController {
             if (employeeDTO.getUserId() != null) {
                 userRepository.findById(employeeDTO.getUserId()).ifPresent(employee::setUser);
             }
-            Employee updatedEmployee = employeeRepository.save(employee);
-            return ResponseEntity.ok(toDTO(updatedEmployee));
-        } else {
-            return ResponseEntity.notFound().build();
+            
+            // Service xử lý cập nhật Employee + nested relationships (languages/certificates)
+            Optional<Employee> updatedOpt = employeeService.updateEmployee(id, employee, employeeDTO);
+            if (updatedOpt.isPresent()) {
+                // Refresh employee để lấy updated languages và certificates từ junction tables
+                Employee refreshedEmployee = employeeRepository.findById(id).orElse(updatedOpt.get());
+                return ResponseEntity.ok(toDTO(refreshedEmployee));
+            }
         }
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -260,6 +269,7 @@ public class EmployeeController {
 
     /**
      * Convert EmployeeDTO sang Employee entity
+     * Note: Languages and Certificates are handled separately in createEmployee() and updateEmployee()
      */
     private Employee toEntity(EmployeeDTO dto) {
         Employee employee = new Employee();
@@ -273,7 +283,6 @@ public class EmployeeController {
             userOpt.ifPresent(employee::setUser);
         }
 
-        // bi-directional relationship correction: EmployeeLanguage and EmployeeCertificate are handled via dedicated endpoints
         return employee;
     }
 }

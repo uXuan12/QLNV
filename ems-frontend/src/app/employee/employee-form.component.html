@@ -1,0 +1,257 @@
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <!-- Header -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">{{ pageTitle }}</h2>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi!</strong> {{ error }}
+        <button type="button" class="btn-close" (click)="error = null"></button>
+      </div>
+
+      <!-- Success Alert -->
+      <div *ngIf="success" class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Thành công!</strong> {{ success }}
+        <button type="button" class="btn-close" (click)="success = null"></button>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="text-center my-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading" class="card">
+        <div class="card-body">
+          <!-- Name Field -->
+          <div class="mb-3">
+            <label for="name" class="form-label">Tên Nhân Viên <span class="text-danger">*</span></label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="name" 
+              formControlName="name"
+              placeholder="Nhập tên nhân viên"
+              [class.is-invalid]="employeeForm.get('name')?.invalid && employeeForm.get('name')?.touched">
+            <div class="invalid-feedback" *ngIf="employeeForm.get('name')?.errors">
+              <span *ngIf="employeeForm.get('name')?.errors?.['required']">Tên nhân viên là bắt buộc</span>
+              <span *ngIf="employeeForm.get('name')?.errors?.['maxlength']">Tên không được vượt quá 255 ký tự</span>
+            </div>
+          </div>
+
+          <!-- Date of Birth Field -->
+          <div class="mb-3">
+            <label for="dob" class="form-label">Ngày Sinh <span class="text-danger">*</span></label>
+            <input 
+              type="date" 
+              class="form-control" 
+              id="dob" 
+              formControlName="dob"
+              [class.is-invalid]="employeeForm.get('dob')?.invalid && employeeForm.get('dob')?.touched">
+            <div class="invalid-feedback" *ngIf="employeeForm.get('dob')?.errors?.['required']">
+              Ngày sinh là bắt buộc
+            </div>
+          </div>
+
+          <!-- Address Field -->
+          <div class="mb-3">
+            <label for="address" class="form-label">Địa Chỉ</label>
+            <textarea 
+              class="form-control" 
+              id="address" 
+              formControlName="address"
+              placeholder="Nhập địa chỉ"
+              rows="3"
+              [class.is-invalid]="employeeForm.get('address')?.invalid && employeeForm.get('address')?.touched"></textarea>
+            <div class="invalid-feedback" *ngIf="employeeForm.get('address')?.errors?.['maxlength']">
+              Địa chỉ không được vượt quá 500 ký tự
+            </div>
+          </div>
+
+          <!-- Phone Field -->
+          <div class="mb-3">
+            <label for="phone" class="form-label">Số Điện Thoại</label>
+            <input 
+              type="tel" 
+              class="form-control" 
+              id="phone" 
+              formControlName="phone"
+              placeholder="Nhập số điện thoại"
+              [class.is-invalid]="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched">
+            <div class="invalid-feedback" *ngIf="employeeForm.get('phone')?.errors?.['maxlength']">
+              Số điện thoại không được vượt quá 20 ký tự
+            </div>
+          </div>
+
+          <!-- User ID Field (Optional) -->
+          <div class="mb-3">
+            <label for="userId" class="form-label">ID Tài Khoản</label>
+            <input 
+              type="number" 
+              class="form-control" 
+              id="userId" 
+              formControlName="userId"
+              placeholder="Nhập ID tài khoản (tùy chọn)">
+          </div>
+
+          <!-- Languages FormArray Section -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="form-label mb-0">Ngôn Ngữ</label>
+              <button 
+                type="button" 
+                class="btn btn-sm btn-outline-success"
+                (click)="addLanguage()">
+                <i class="bi bi-plus"></i> Thêm Ngôn Ngữ
+              </button>
+            </div>
+
+            <div *ngIf="languagesArray.length === 0" class="alert alert-info">
+              Chưa có ngôn ngữ nào. Nhấp "Thêm Ngôn Ngữ" để bổ sung.
+            </div>
+
+            <div *ngFor="let languageControl of languagesArray.controls; let i = index" 
+              [formGroupName]="i" 
+              class="card mb-3">
+              <div class="card-body">
+                <div class="row">
+                  <!-- Language Select -->
+                  <div class="col-md-8">
+                    <label class="form-label">Chọn Ngôn Ngữ <span class="text-danger">*</span></label>
+                    <select 
+                      class="form-select"
+                      formControlName="languageId"
+                      (change)="onLanguageChange(i, languageControl.get('languageId')?.value)"
+                      [class.is-invalid]="languageControl.get('languageId')?.invalid && languageControl.get('languageId')?.touched">
+                      <option value="">-- Chọn ngôn ngữ --</option>
+                      <option *ngFor="let lang of languages" [value]="lang.id">
+                        {{ lang.name }} ({{ lang.level }})
+                      </option>
+                    </select>
+                    <div class="invalid-feedback">Vui lòng chọn ngôn ngữ</div>
+                  </div>
+
+                  <!-- Language Name (Read-only) -->
+                  <div class="col-md-4">
+                    <label class="form-label">Tên Ngôn Ngữ</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      formControlName="languageName"
+                      readonly>
+                  </div>
+                </div>
+
+                <!-- Remove Button -->
+                <div class="mt-3">
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="removeLanguage(i)">
+                    <i class="bi bi-trash"></i> Xóa
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certificates FormArray Section -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="form-label mb-0">Chứng Chỉ</label>
+              <button 
+                type="button" 
+                class="btn btn-sm btn-outline-success"
+                (click)="addCertificate()">
+                <i class="bi bi-plus"></i> Thêm Chứng Chỉ
+              </button>
+            </div>
+
+            <div *ngIf="certificatesArray.length === 0" class="alert alert-info">
+              Chưa có chứng chỉ nào. Nhấp "Thêm Chứng Chỉ" để bổ sung.
+            </div>
+
+            <div *ngFor="let certificateControl of certificatesArray.controls; let i = index" 
+              [formGroupName]="i" 
+              class="card mb-3">
+              <div class="card-body">
+                <div class="row">
+                  <!-- Certificate Select -->
+                  <div class="col-md-8">
+                    <label class="form-label">Chọn Chứng Chỉ <span class="text-danger">*</span></label>
+                    <select 
+                      class="form-select"
+                      formControlName="certificateId"
+                      (change)="onCertificateChange(i, certificateControl.get('certificateId')?.value)"
+                      [class.is-invalid]="certificateControl.get('certificateId')?.invalid && certificateControl.get('certificateId')?.touched">
+                      <option value="">-- Chọn chứng chỉ --</option>
+                      <option *ngFor="let cert of certificates" [value]="cert.id">
+                        {{ cert.name }}
+                      </option>
+                    </select>
+                    <div class="invalid-feedback">Vui lòng chọn chứng chỉ</div>
+                  </div>
+
+                  <!-- Certificate Name (Read-only) -->
+                  <div class="col-md-4">
+                    <label class="form-label">Tên Chứng Chỉ</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      formControlName="certificateName"
+                      readonly>
+                  </div>
+                </div>
+
+                <!-- Remove Button -->
+                <div class="mt-3">
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="removeCertificate(i)">
+                    <i class="bi bi-trash"></i> Xóa
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="card-footer bg-light">
+          <div class="d-flex gap-2">
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="isSaving || !employeeForm.valid">
+              <span *ngIf="!isSaving">{{ isEditing ? 'Cập Nhật' : 'Thêm Nhân Viên' }}</span>
+              <span *ngIf="isSaving">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Đang lưu...
+              </span>
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-secondary"
+              (click)="resetForm()">
+              Đặt Lại
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-outline-danger"
+              (click)="cancel()">
+              Hủy
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
